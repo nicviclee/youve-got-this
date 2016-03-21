@@ -1,0 +1,43 @@
+body {
+    background: url('/../images/bark.png');
+    background-size: fill;
+    background-repeat: no-repeat;
+    text-align: center;
+    font-family: 'Raleway', sans-serif;
+    color: white;
+}
+
+h1 {
+    font-size: 40px;
+}
+
+p {
+    font-size: 18px;
+}
+
+img {
+    display: inline;
+}
+
+span {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    left: 50%;
+    top: 50%;
+    margin-left: -150px;
+    margin-top: -150px;
+}
+
+button {
+    background-color: #5FF1CF;
+    border: none;
+    border-radius: 5px;
+    height: 60px;
+    width: 160px;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    font-family: 'Raleway', sans-serif;
+    margin-top: 20px;
+}
