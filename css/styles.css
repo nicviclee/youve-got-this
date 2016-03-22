@@ -41,3 +41,7 @@ button {
     font-family: 'Raleway', sans-serif;
     margin-top: 20px;
 }
+
+button:hover {
+    background-color: #83f4da;
+}
