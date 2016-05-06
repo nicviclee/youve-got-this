@@ -5,7 +5,7 @@ const app = require('express')();
 var PORT = 8000;
 var HOST = 'localhost';
 
-server = http.createServer(app).listen(PORT, HOST);
+http.createServer(app).listen(PORT, HOST);
 console.log('HTTPS Server listening on %s:%s', HOST, PORT);
 
 //routes
