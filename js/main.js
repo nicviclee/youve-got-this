@@ -62,7 +62,7 @@ function initialiseState() {
       .then(function(subscription) {
         // Enable any UI which subscribes / unsubscribes from
         // push messages.
-        subscribeButton.prop('disabled', false); false;
+        subscribeButton.prop('disabled', false);
 
         if (!subscription) {
           // We aren't subscribed to push, so set UI
