@@ -130,7 +130,7 @@ function unsubscribe() {
 }
 
 function sendSubscriptionToServer(subscription) {
-    postToAppServer('register', function(data) {
+    postToAppServer('register', subscription.endpoint, function(data) {
         // Registration successful
         console.log('Registered with Application Server! Data:', data);
     });
