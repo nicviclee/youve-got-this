@@ -32,7 +32,7 @@ var quotes = [
     '“Hold on to what is good, even if it’s a handful of earth.” ~Hopi prayer',
     '“Let your soul stand cool and composed before a million universes.” ~Walt Whitman',
     '“If you are going through hell, keep going.” ~Winston Churchill',
-    '“Tell you heart that the fear of suffering is worse than suffering itself. And no heart has ever suffered when it goes in search of its dream.” ~Paulo Coelho',
+    '“Tell your heart that the fear of suffering is worse than suffering itself. And no heart has ever suffered when it goes in search of its dream.” ~Paulo Coelho',
     '“The secret of health for both mind and body is not to mourn for the past, not to worry about the future . . . but to live the present moment wisely and earnestly.” ~Buddha',
     '“In the midst of movement and chaos, keep stillness inside of you.” ~Deepak Chopra',
     '“Good humor is a tonic for mind and body. It is the best antidote for anxiety and depression. It is a business asset. It attracts and keep friends. It lightens human burdens. It is the direct route to serenity and contentment.” ~Greenville Kleisser',
