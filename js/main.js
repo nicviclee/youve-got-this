@@ -123,7 +123,7 @@ function unsubscribe() {
         }).catch(function(err) {
             console.log('Error unsubscribing.', err);
             subscribeButton.textConent = 'Subscribe';
-        });
+        }, 3000);
     }).catch(function(err) {
         console.error('Error thrown while getting subscription to unsubscribe.', err);
     });
