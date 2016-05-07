@@ -12,9 +12,16 @@ self.addEventListener('activate', function(event) {
 
 self.addEventListener('push', function(event) {
     console.log('Push message', event);
-    var obj = event.data.json();
-    var title = obj.title;
-    var message = obj.message;
+    var title;
+    var message;
+    if(event.data != null) {
+        var obj = event.data.json();
+        title = obj.title;
+        message = obj.message;
+    } else {
+        title = 'Error';
+        message = 'No message content';
+    }
     var icon = '/images/penguin.png';
     var notificationTag = "youve-got-this-tag";
     event.waitUntil( //'until' extends lifetime of event handler until showNotification() is resolved

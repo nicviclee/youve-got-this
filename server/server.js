@@ -39,17 +39,24 @@ app.post('/register', function (req, res) {
     });
 
     req.on('end', function() {
-      if (!body) return;
-      //var obj = JSON.parse(body);
+        if (!body) return;
+        var obj = JSON.parse(body);
         console.log("Req body: " + body);
         
-        var endpointSections = body.split('/');
-        var subscriptionId = endpointSections[endpointSections.length - 1];
+        var params = {
+            userPublicKey: obj.keys.p256dh,
+            userAuth: obj.keys.auth,
+            payload: JSON.stringify({
+                title: 'Placeholder-Name',
+                message: 'Thanks for registering! Be prepared to be encouraged.'
+            })
+        };
         
-        webPush.sendNotification(body, JSON.stringify({
-              title: 'Placeholder-Name',
-              msg: 'Thanks for registering! Be prepared to be encouraged.'
-            }));
+        console.log('user public key: ' + obj.keys.p256dh);
+        console.log('userAuth: ' + obj.keys.auth);
+        console.log('endpoint: ' + obj.endpoint);
+        
+        webPush.sendNotification(obj.endpoint, params);
     });
         
         
