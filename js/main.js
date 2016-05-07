@@ -3,7 +3,8 @@
 var reg; //ServiceWorkerRegistration object
 var isSubscribed = false;
 var subscribeButton;  // document.querySelector('button');
-var serverUrl = "http://placeholder.com/";
+//var serverUrl = "http://placeholder.com/";
+var serverUrl = "http://localhost:3000/";
 
 $(document).ready(function() {
     subscribeButton = $('#subscribeButton');
@@ -130,14 +131,14 @@ function unsubscribe() {
 }
 
 function sendSubscriptionToServer(subscription) {
-    postToAppServer('register', subscription.endpoint, function(data) {
+    postToAppServer('register', JSON.stringify(subscription), function(data) {
         // Registration successful
         console.log('Registered with Application Server! Data:', data);
     });
 }
 
 function removeSubscriptionFromServer(subscription) {
-    postToAppServer('unregister', subscription.endpoint, function(data) {
+    postToAppServer('unregister', JSON.stringify(subscription), function(data) {
         // Registration successful
         console.log('Unregistered with Application Server! Data:', data);
     });
