@@ -35,4 +35,4 @@ var encouragements = [
     "You make me smile.",
     "I love you."
 ];
-export default encouragements;
+exports.list = encouragements;

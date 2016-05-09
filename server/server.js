@@ -2,9 +2,11 @@ const http = require('http');
 const fs = require('fs');
 const app = require('express')();
 const webPush = require('web-push');
+const encouragements = require('./encouragements.js');
 
-var ids = {}; // holds subscription ids and index of next message to send
-var encouragements = []; // array of encouraging messages
+var subscriptions = {}; // holds subscription objects
+
+var messageFrequency = 900000; //15 minutes (in milliseconds)
 
 var PORT = 3000;
 var HOST = 'localhost';
@@ -21,45 +23,20 @@ app.use(function(req, res, next) {
 });
 
 //routes
-app.get('/', function (req, res) {
-    console.log("GET request for encouraging message");
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end(getNextMessage());
-    res.end();
-});
-
 app.post('/register', function (req, res) {
     console.log("POST to register endpoint");
-    //console.log("Req data: " + req.data);
     
     var body = "";
-
+    
     req.on('data', function(chunk) {
       body += chunk;
     });
 
     req.on('end', function() {
         if (!body) return;
-        var obj = JSON.parse(body);
-        console.log("Req body: " + body);
-        
-        var params = {
-            userPublicKey: obj.keys.p256dh,
-            userAuth: obj.keys.auth,
-            payload: JSON.stringify({
-                title: 'Placeholder-Name',
-                message: 'Thanks for registering! Be prepared to be encouraged.'
-            })
-        };
-        
-        console.log('user public key: ' + obj.keys.p256dh);
-        console.log('userAuth: ' + obj.keys.auth);
-        console.log('endpoint: ' + obj.endpoint);
-        
-        webPush.sendNotification(obj.endpoint, params);
+        registerUser(body);
     });
-        
-        
+              
     res.writeHead(200, {'Content-Type': 'text/plain'});
     res.end('Subscription has been registered');
     res.end();
@@ -72,6 +49,61 @@ app.post('/unregister', function (req, res) {
     res.end();
 });
 
+function registerUser(body){
+    var obj = JSON.parse(body);
+    console.log("Req body: " + body);
+      
+    //Add user to list of subscriptions
+    var user = {
+        name: 'Placeholder-Name',
+        userPublicKey: obj.keys.p256dh,
+        userAuth: obj.keys.auth
+    };    
+    subscriptions[obj.endpoint] = user;
+        
+    var params = {
+        userPublicKey: obj.keys.p256dh,
+        userAuth: obj.keys.auth,
+        payload: JSON.stringify({
+            title: 'Placeholder-Name',
+            message: 'Thanks for registering! Be prepared to be encouraged.'
+        })
+    };
+        
+    console.log('user public key: ' + obj.keys.p256dh);
+    console.log('userAuth: ' + obj.keys.auth);
+    console.log('endpoint: ' + obj.endpoint);
+        
+    webPush.sendNotification(obj.endpoint, params);
+}
+
 function getNextMessage(user){
+    var list = encouragements.list;
+    console.log("List size: " + list.length);
     return "You can do it!!!";
 }
+
+function sendNextNotification() {
+    console.log("It's notification time!");
+    //Send next message to each subscriber
+    for (var key in subscriptions) {
+        var user = subscriptions[key];
+        console.log("Key: " + key);
+        console.log("Name: " + user.name);
+        console.log("Name: " + user.userPublicKey);
+        console.log("Name: " + user.userAuth);
+        
+        var params = {
+            userPublicKey: user.userPublicKey,
+            userAuth: user.userAuth,
+            payload: JSON.stringify({
+                title: user.name,
+                message: getNextMessage()
+            })
+        };
+        webPush.sendNotification(key, params);
+    }
+
+}
+
+setInterval(sendNextNotification, messageFrequency);
