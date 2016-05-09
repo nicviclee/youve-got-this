@@ -95,6 +95,11 @@ function subscribe() { //subscribe to push messaging
         subscribeButton.prop('disabled', false);
         subscribeButton.text('Unsubscribe');
         isSubscribed = true;
+        var name = $('#userName').val();
+        if (!name.trim()) {
+            name = 'friend';
+        }
+        pushSubscription.name = name;
         sendSubscriptionToServer(pushSubscription);
     }).catch(function(error) {
         // During development it often helps to log errors to the
