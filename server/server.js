@@ -12,10 +12,9 @@ var messageFrequency = 9000;// 900000; //15 minutes (in milliseconds)
 var PORT = 3000;
 var HOST = 'localhost';
 
-function User (name, key, auth) {
+function User(subscription, name) {
     this.name = name;
-    this.publicKey = key;
-    this.auth = auth;
+    this.subscription = subscription;
 }
 
 webPush.setGCMAPIKey(/*GCM API Key*/);
@@ -72,35 +71,35 @@ app.post('/unregister', function (req, res) {
 });
 
 function unregisterUser(body){
-    var obj = JSON.parse(body);
+    var user = JSON.parse(body);
     console.log("Req body: " + body);
 
-    //remove user from list of subscriptions
-    delete subscriptions[obj.endpoint];
+    // remove user from list of subscriptions
+    delete subscriptions[user.subscription.endpoint];
 }
 
 function registerUser(body){
     var obj = JSON.parse(body);
     console.log("Req body: " + body);
 
-    //Add user to list of subscriptions
-    var user = new User (obj.name, obj.keys.p256dh, obj.keys.auth);
-    subscriptions[obj.endpoint] = user;
+    // Add user to list of subscriptions
+    var user = new User(obj.subscription, obj.name);
+    subscriptions[user.subscription.endpoint] = user;
 
     var params = {
-        userPublicKey: obj.keys.p256dh,
-        userAuth: obj.keys.auth,
+        userPublicKey: user.subscription.keys.p256dh,
+        userAuth: user.subscription.keys.auth,
         payload: JSON.stringify({
             title: user.name,
             message: 'Thanks for registering! Be prepared to be encouraged.'
         })
     };
 
-    console.log('user public key: ' + obj.keys.p256dh);
-    console.log('userAuth: ' + obj.keys.auth);
-    console.log('endpoint: ' + obj.endpoint);
+    console.log('user public key: ' + user.subscription.keys.p256dh);
+    console.log('userAuth: ' + user.subscription.keys.auth);
+    console.log('endpoint: ' + user.subscription.endpoint);
 
-    webPush.sendNotification(obj.endpoint, params);
+    webPush.sendNotification(user.subscription.endpoint, params);
 }
 
 function getNextMessage(user){
@@ -117,12 +116,12 @@ function sendNextNotification() {
         var user = subscriptions[key];
         console.log("Key: " + key);
         console.log("Name: " + user.name);
-        console.log("Name: " + user.userPublicKey);
-        console.log("Name: " + user.userAuth);
+        console.log("Public key: " + user.subscription.keys.p256dh);
+        console.log("User Auth: " + user.subscription.keys.auth);
 
         var params = {
-            userPublicKey: user.userPublicKey,
-            userAuth: user.userAuth,
+            userPublicKey: user.subscription.keys.p256dh,
+            userAuth: user.subscription.keys.auth,
             payload: JSON.stringify({
                 title: user.name,
                 message: getNextMessage()

@@ -3,11 +3,19 @@
 var reg; //ServiceWorkerRegistration object
 var isSubscribed = false;
 var subscribeButton;  // document.querySelector('button');
+var nameInput;
 //var serverUrl = "http://placeholder.com/";
-var serverUrl = "http://localhost:3000/";
+var SERVER_URL = "http://localhost:3000/";
+var DEFAULT_NAME = 'Friend';
+
+function User(subscription, name) {
+    this.subscription = subscription;
+    this.name = name;
+}
 
 $(document).ready(function() {
     subscribeButton = $('#subscribeButton');
+    nameInput = $('#userName');
     console.log(subscribeButton);
     if ('serviceWorker' in navigator) {
         console.log('Service Worker is supported');
@@ -89,18 +97,21 @@ function initialiseState() {
 function subscribe() { //subscribe to push messaging
     console.log('Subscribing.');
     subscribeButton.prop('disabled', true);
+    nameInput.prop('disabled', true);
     reg.pushManager.subscribe({userVisibleOnly: true})
     .then(function(pushSubscription) {
         console.log('Subscribed to Notification Server! Endpoint:', pushSubscription.endpoint);
         subscribeButton.prop('disabled', false);
         subscribeButton.text('Unsubscribe');
         isSubscribed = true;
-        var name = $('#userName').val();
-        if (!name.trim()) {
-            name = 'friend';
+        var name = nameInput.val();
+        if (!name.trim() || name === undefined) {
+            console.log('Using default name.');
+            name = DEFAULT_NAME;
+            nameInput.val(name);
         }
-        pushSubscription.name = name;
-        sendSubscriptionToServer(pushSubscription);
+        var user = new User(pushSubscription, name);
+        sendSubscriptionToServer(user);
     }).catch(function(error) {
         // During development it often helps to log errors to the
         // console. In a production environment it might make sense to
@@ -117,40 +128,50 @@ function unsubscribe() {
             isSubscribed = false;
             subscribeButton.prop('disabled', false);
             subscribeButton.text('Subscribe');
+            nameInput.prop('disabled', false);
             return;
         }
 
         pushSubscription.unsubscribe().then(function(event) {
             subscribeButton.prop('disabled', false);
             subscribeButton.text('Subscribe');
+            nameInput.prop('disabled', false);
             console.log('Unsubscribed!', event);
             isSubscribed = false;
-            removeSubscriptionFromServer(pushSubscription);
+            var name = nameInput.val();
+            var user = new User(pushSubscription, name);
+            removeSubscriptionFromServer(user);
         }).catch(function(err) {
             console.log('Error unsubscribing.', err);
-            subscribeButton.textConent = 'Subscribe';
+            subscribeButton.prop('disabled', false);
+            subscribeButton.text('Subscribe');
+            nameInput.prop('disabled', false);
         }, 3000);
     }).catch(function(err) {
+        subscribeButton.prop('disabled', false);
+        subscribeButton.text('Subscribe');
+        nameInput.prop('disabled', false);
         console.error('Error thrown while getting subscription to unsubscribe.', err);
     });
 }
 
-function sendSubscriptionToServer(subscription) {
-    postToAppServer('register', JSON.stringify(subscription), function(data) {
+function sendSubscriptionToServer(user) {
+    console.log('User: ' + JSON.stringify(user));
+    postToAppServer('register', JSON.stringify(user), function(data) {
         // Registration successful
         console.log('Registered with Application Server! Data:', data);
     });
 }
 
-function removeSubscriptionFromServer(subscription) {
-    postToAppServer('unregister', JSON.stringify(subscription), function(data) {
+function removeSubscriptionFromServer(user) {
+    postToAppServer('unregister', JSON.stringify(user), function(data) {
         // Registration successful
         console.log('Unregistered with Application Server! Data:', data);
     });
 }
 
-function postToAppServer(action, endpoint, callback) {
-    $.post(serverUrl + action, endpoint, function(data) {
+function postToAppServer(action, info, callback) {
+    $.post(SERVER_URL + action, info, function(data) {
         // Do something
         callback(data);
     }, 'JSON');
