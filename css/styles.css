@@ -13,36 +13,54 @@ h1 {
 
 p {
     font-size: 18px;
+    margin-bottom: 40px;
 }
 
 img {
     display: inline;
 }
 
-span {
+#content {
     position: absolute;
-    width: 300px;
-    height: 300px;
-    left: 50%;
+    display: block;
+    width: 360px;
+    left: 48%;
     top: 50%;
     margin-left: -150px;
     margin-top: -150px;
 }
 
+#subscribe {
+    margin-top: 40px;
+    padding-top: 40px;
+    position: relative;
+}
+
+input {
+    width: 200px;
+    font-size: 16px;
+    line-height: 48px;
+    border-radius: 5px;
+    border: none;
+    padding-left: 16px;
+    padding-right: 16px;
+    float: left;
+}
+
 button {
-    background-color: #5FF1CF;
+    background-color: #1CE6DF;
     border: none;
     border-radius: 5px;
-    height: 60px;
-    width: 160px;
+    height: 50px;
+    width: 120px;
+    margin: 0px;
     font-size: 16px;
     font-weight: 700;
     color: white;
     font-family: 'Raleway', sans-serif;
-    margin-top: 20px;
     cursor: pointer;
 }
 
 button:hover {
-    background-color: #83f4da;
+    background-color: #29FEF7;
 }
