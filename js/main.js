@@ -5,7 +5,7 @@ var isSubscribed = false;
 var subscribeButton;  // document.querySelector('button');
 var nameInput;
 //var serverUrl = "http://placeholder.com/";
-var SERVER_URL = "http://localhost:3000/";
+var SERVER_URL = "http://youvegotthis.herokuapp.com/server";
 var DEFAULT_NAME = 'Friend';
 
 function User(subscription, name) {

@@ -17,7 +17,7 @@ function User(subscription, name) {
     this.subscription = subscription;
 }
 
-webPush.setGCMAPIKey(/*GCM API Key*/);
+webPush.setGCMAPIKey('AIzaSyDWCPsPNDh1yEMXbTbTN5H8pn7CbnwpC48'/*GCM API Key*/);
 
 http.createServer(app).listen(PORT, HOST);
 console.log('HTTPS Server listening on %s:%s', HOST, PORT);
