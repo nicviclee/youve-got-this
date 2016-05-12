@@ -1,5 +1,6 @@
 "use strict";
-const http = require('http');
+//const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const app = require('express')();
 const webPush = require('web-push');
@@ -19,7 +20,12 @@ function User(subscription, name) {
 
 webPush.setGCMAPIKey('AIzaSyDWCPsPNDh1yEMXbTbTN5H8pn7CbnwpC48'/*GCM API Key*/);
 
-http.createServer(app).listen(PORT, HOST);
+var options = {
+  key: fs.readFileSync('key.pem'),
+  cert: fs.readFileSync('cert.pem')
+};
+
+https.createServer(options, app).listen(PORT, HOST);
 console.log('HTTPS Server listening on %s:%s', HOST, PORT);
 
 app.use(function(req, res, next) {
