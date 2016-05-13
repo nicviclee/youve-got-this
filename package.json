@@ -1,0 +1,21 @@
+{
+  "name": "youvegotthis",
+  "version": "1.0.0",
+  "description": "encouragement push notifications app",
+  "author": "Nicole Lee and Mike Fink",
+  "bin": {},
+  "scripts": {
+    "start": "node index.js",
+    "predeploy": "echo im about to deploy",
+    "postdeploy": "echo ive deployed",
+  },
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nicviclee/youve-got-this"
+  },
+  "dependencies": {
+    "web-push": "^2.1.1",
+    "express": "^4.13.3"
+  }
+}
