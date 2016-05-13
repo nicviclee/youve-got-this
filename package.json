@@ -5,7 +5,7 @@
   "author": "Nicole Lee and Mike Fink",
   "bin": {},
   "scripts": {
-    "start": "node index.js",
+    "start": "node server.js",
     "predeploy": "echo im about to deploy",
     "postdeploy": "echo ive deployed",
   },
