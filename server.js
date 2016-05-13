@@ -1,9 +1,9 @@
 "use strict";
 const http = require('http');
 const fs = require('fs');
-const app = require('express')();
+const express = require('express');
 const webPush = require('web-push');
-const encouragements = require('./js/encouragements.js');
+const encouragements = require('./encouragements.js');
 
 var subscriptions = {}; // holds subscription objects
 
@@ -19,6 +19,8 @@ function User(subscription, name) {
 
 webPush.setGCMAPIKey(/*GCM API Key*/);
 
+var app = express();
+
 http.createServer(app).listen(PORT, HOST);
 console.log('Server listening on %s:%s', HOST, PORT);
 
@@ -28,9 +30,11 @@ app.use(function(req, res, next) {
     next();
 });
 
+app.use(express.static(__dirname + '/public'));
+
 //routes
 app.get('/', function (req, res) {
-  res.send('Hello World!');
+    res.render('index');
 });
 
 app.post('/register', function (req, res) {

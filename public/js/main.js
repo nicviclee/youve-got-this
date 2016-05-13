@@ -5,7 +5,7 @@ var isSubscribed = false;
 var subscribeButton;  // document.querySelector('button');
 var nameInput;
 //var serverUrl = "http://placeholder.com/";
-var SERVER_URL = "http://youvegotthis-nicviclee.rhcloud.com/";
+var SERVER_URL = "http://localhost:8080/";
 var DEFAULT_NAME = 'Friend';
 
 function User(subscription, name) {
@@ -19,7 +19,7 @@ $(document).ready(function() {
     console.log(subscribeButton);
     if ('serviceWorker' in navigator) {
         console.log('Service Worker is supported');
-        navigator.serviceWorker.register('sw.js').then(function() {
+        navigator.serviceWorker.register('./../sw.js').then(function() {
             return navigator.serviceWorker.ready;
         }).then(function(serviceWorkerRegistration) {
             reg = serviceWorkerRegistration;
