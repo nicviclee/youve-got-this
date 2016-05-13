@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "predeploy": "echo im about to deploy",
-    "postdeploy": "echo ive deployed",
+    "postdeploy": "echo ive deployed"
   },
   "main": "server.js",
   "repository": {
