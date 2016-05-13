@@ -20,6 +20,7 @@ var YGTApp = function() {
         self.ipAddress = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
         self.port = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3000;
 
+        webPush.setGCMAPIKey(/*GCM API Key*/);
         self.subscriptions = {}; // holds subscription objects
     };
 
@@ -94,8 +95,6 @@ var YGTApp = function() {
 
         self.app.set('port', self.port);
         self.app.set('ip', self.ipAddress);
-
-        webPush.setGCMAPIKey(/*GCM API Key*/);
 
         self.app.get('/', self.routes['/']);
 
