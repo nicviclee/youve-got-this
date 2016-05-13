@@ -1,11 +1,11 @@
 "use strict";
-const http = require('http');
+var http = require('http');
 // const https = require('https');
-const fs = require('fs');
-const express = require('express');
-const webPush = require('web-push');
-const encouragements = require('./encouragements.js');
-const MESSAGE_FREQUENCY = 9000;// 900000; //15 minutes (in milliseconds)
+var fs = require('fs');
+var express = require('express');
+var webPush = require('web-push');
+var encouragements = require('./encouragements.js');
+var MESSAGE_FREQUENCY = 9000;// 900000; //15 minutes (in milliseconds)
 
 function User(subscription, name) {
     this.name = name;
