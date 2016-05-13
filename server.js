@@ -3,7 +3,7 @@ const http = require('http');
 const fs = require('fs');
 const app = require('express')();
 const webPush = require('web-push');
-const encouragements = require('./encouragements.js');
+const encouragements = require('./js/encouragements.js');
 
 var subscriptions = {}; // holds subscription objects
 
