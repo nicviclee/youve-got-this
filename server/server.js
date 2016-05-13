@@ -9,8 +9,8 @@ var subscriptions = {}; // holds subscription objects
 
 var messageFrequency = 9000;// 900000; //15 minutes (in milliseconds)
 
-var PORT = 3000;
-var HOST = 'localhost';
+var PORT = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+var HOST = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 
 function User(subscription, name) {
     this.name = name;
@@ -20,7 +20,7 @@ function User(subscription, name) {
 webPush.setGCMAPIKey(/*GCM API Key*/);
 
 http.createServer(app).listen(PORT, HOST);
-console.log('HTTPS Server listening on %s:%s', HOST, PORT);
+console.log('Server listening on %s:%s', HOST, PORT);
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
