@@ -17,8 +17,9 @@ var YGTApp = function() {
 
     self.setupVariables = function() {
         self.appName = process.env.OPENSHIFT_APP_NAME || 'ygt';
-        self.ipAddress = process.env.OPENSHIFT_INTERNAL_IP || process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
-        self.port = process.env.OPENSHIFT_INTERNAL_PORT || process.env.OPENSHIFT_NODEJS_PORT || 8084;
+        self.ipAddress = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
+        self.port = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3000;
+
         self.subscriptions = {}; // holds subscription objects
     };
 
@@ -91,17 +92,31 @@ var YGTApp = function() {
         self.createRoutes();
         self.app = express();
 
+        self.app.set('port', self.port);
+        self.app.set('ip', self.ipAddress);
+
         webPush.setGCMAPIKey(/*GCM API Key*/);
 
-        self.app.get('/', redirectSec, self.routes['/']);
+        self.app.get('/', self.routes['/']);
 
-        self.app.post('/register', redirectSec, self.routes['/register']);
-        self.app.post('/unregister', redirectSec, self.routes['/unregister']);
+        self.app.post('/register', self.routes['/register']);
+        self.app.post('/unregister', self.routes['/unregister']);
+
+        // Trusting Openshift proxy
+        self.app.enable('trust proxy');
 
         self.app.use(function(req, res, next) {
             res.header("Access-Control-Allow-Origin", "*");
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-            next();
+
+            // Http -> Https redirection middleware
+            if (req.headers['x-forwarded-proto'] === 'http' ) {
+                console.log('Redirecting to https');
+                var tmp = 'https://' + req.headers.host + req.originalUrl;
+                res.redirect(tmp);
+            } else {
+                return next();
+            }
         });
 
         self.app.use(express.static(__dirname + '/public'));
@@ -116,7 +131,7 @@ var YGTApp = function() {
     // Start server and listen
     self.start = function() {
         self.server = http.createServer(self.app);
-        self.server.listen(self.port, self.ipAddress);
+        self.server.listen(self.app.get('port'), self.app.get('ip'));
         console.log('Listening on port %s at address %s', self.port, self.ipAddress);
         setInterval(self.sendNextNotification, MESSAGE_FREQUENCY);
     };
@@ -190,16 +205,6 @@ var YGTApp = function() {
 // Using Math.round() will give you a non-uniform distribution!
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
-}
-
-// Redirects requests to HTTPS
-function redirectSec(req, res, next) {
-    if (req.headers['x-forwarded-proto'] === 'http') {
-        console.log('Redirecting to https');
-        res.redirect('https://' + req.headers.host + req.path);
-    } else {
-        return next();
-    }
 }
 
 //http.createServer(app).listen(PORT, HOST);
