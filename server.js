@@ -29,6 +29,10 @@ app.use(function(req, res, next) {
 });
 
 //routes
+app.get('/', function (req, res) {
+  res.send('Hello World!');
+});
+
 app.post('/register', function (req, res) {
     console.log("POST to register endpoint");
 
