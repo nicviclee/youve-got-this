@@ -5,7 +5,7 @@ var isSubscribed = false;
 var subscribeButton;  // document.querySelector('button');
 var nameInput;
 //var serverUrl = "http://placeholder.com/";
-var SERVER_URL = "http://localhost:8080/";
+var SERVER_URL = document.location.hostname;
 var DEFAULT_NAME = 'Friend';
 
 function User(subscription, name) {
@@ -171,7 +171,8 @@ function removeSubscriptionFromServer(user) {
 }
 
 function postToAppServer(action, info, callback) {
-    $.post(SERVER_URL + action, info, function(data) {
+    //console.log(SERVER_URL + ' action ' + action);
+    $.post(action, info, function(data) {
         // Do something
         callback(data);
     }, 'JSON');
