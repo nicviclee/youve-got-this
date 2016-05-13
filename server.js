@@ -1,11 +1,10 @@
 "use strict";
 var http = require('http');
-// const https = require('https');
 var fs = require('fs');
 var express = require('express');
 var webPush = require('web-push');
 var encouragements = require('./encouragements.js');
-var MESSAGE_FREQUENCY = 9000;// 900000; //15 minutes (in milliseconds)
+var MESSAGE_FREQUENCY = 900000; //15 minutes (in milliseconds)
 
 function User(subscription, name) {
     this.name = name;
@@ -17,18 +16,17 @@ var YGTApp = function() {
 
     self.setupVariables = function() {
         self.appName = process.env.OPENSHIFT_APP_NAME || 'ygt';
-        self.ipAddress = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
+        self.ipAddress = process.env.OPENSHIFT_NODEJS_IP;
         self.port = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3000;
 
-        webPush.setGCMAPIKey(/*GCM API Key*/);
+        webPush.setGCMAPIKey(/*GCM API KEY*/);
         self.subscriptions = {}; // holds subscription objects
+
+        if (typeof self.ipAddress === "undefined") {
+            self.ipAddress = "127.0.0.1";
+            console.warn('No OPENSHIFT_NODEJS_IP var, using %s', self.ipAddress);
+        }
     };
-
-    if (typeof self.ipAddress === "undefined") {
-        self.ipAddress = "127.0.0.1";
-        console.warn('No OPENSHIFT_NODEJS_IP var, using %s', self.ipAddress);
-    }
-
 
     // var subscriptions = {}; // holds subscription objects
 
@@ -42,6 +40,7 @@ var YGTApp = function() {
         };
 
         self.routes['/'] = function (req, res) {
+            console.log("Request for / at: " + req.headers.host + req.originalUrl);
             res.sendFile(__dirname + '/public/index.html');
         };
 
@@ -69,7 +68,7 @@ var YGTApp = function() {
         self.routes['/unregister'] = function (req, res) {
             console.log("POST to unregister endpoint");
             var body = "";
-
+            var reply;
             req.on('data', function(chunk) {
                 body += chunk;
             });
@@ -78,28 +77,28 @@ var YGTApp = function() {
                 if (!body) {
                     return;
                 }
-                self.unregisterUser(body);
+                var success = self.unregisterUser(body);
+                if (success) {
+                    reply = 'Endpoint has been removed';
+                } else {
+                    reply = 'Something went wrong. No endpoint removed.';
+                }
             });
 
 
             res.writeHead(200, {'Content-Type': 'text/plain'});
-            res.end('Endpoint has been removed');
+            res.end(reply);
             res.end();
         };
     };
 
     // Initialize server
-    self.initiializeServer = function() {
+    self.initializeServer = function() {
         self.createRoutes();
         self.app = express();
 
         self.app.set('port', self.port);
         self.app.set('ip', self.ipAddress);
-
-        self.app.get('/', self.routes['/']);
-
-        self.app.post('/register', self.routes['/register']);
-        self.app.post('/unregister', self.routes['/unregister']);
 
         // Trusting Openshift proxy
         self.app.enable('trust proxy');
@@ -107,16 +106,24 @@ var YGTApp = function() {
         self.app.use(function(req, res, next) {
             res.header("Access-Control-Allow-Origin", "*");
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            next();
+        });
 
+        self.app.use(function(req, res, next) {
             // Http -> Https redirection middleware
             if (req.headers['x-forwarded-proto'] === 'http' ) {
-                console.log('Redirecting to https');
                 var tmp = 'https://' + req.headers.host + req.originalUrl;
+                console.log('Redirecting to https at:' + tmp);
                 res.redirect(tmp);
             } else {
                 return next();
             }
         });
+
+        self.app.get('/', self.routes['/']);
+
+        self.app.post('/register', self.routes['/register']);
+        self.app.post('/unregister', self.routes['/unregister']);
 
         self.app.use(express.static(__dirname + '/public'));
     };
@@ -124,7 +131,7 @@ var YGTApp = function() {
     // Initialize applciation
     self.initialize = function() {
         self.setupVariables();
-        self.initiializeServer();
+        self.initializeServer();
     };
 
     // Start server and listen
@@ -139,8 +146,15 @@ var YGTApp = function() {
         var user = JSON.parse(body);
         console.log("Req body: " + body);
 
-        // remove user from list of subscriptions
-        delete self.subscriptions[user.subscription.endpoint];
+        if (user.subscription && user.subscription.endpoint) {
+            // remove user from list of subscriptions
+            delete self.subscriptions[user.subscription.endpoint];
+            console.log("Removed user: " + user.subscription.endpoint);
+            return true;
+        } else {
+            console.log("Something was wrong with that request.");
+            return false;
+        }
     };
 
     self.registerUser = function(body){
@@ -149,14 +163,21 @@ var YGTApp = function() {
 
         // Add user to list of subscriptions
         var user = new User(obj.subscription, obj.name);
-        self.subscriptions[user.subscription.endpoint] = user;
+        var msg;
+        var subEntry = self.subscriptions[user.subscription.endpoint];
+        if (subEntry === undefined || subEntry === null ) {
+            self.subscriptions[user.subscription.endpoint] = user;
+            msg = 'Thanks for registering! Be prepared to be encouraged.\n\nYou\'ve got this!';
+        } else {
+            msg = 'You are already registered, thanks for the update!\n\nYou\'ve got this!';
+        }
 
         var params = {
             userPublicKey: user.subscription.keys.p256dh,
             userAuth: user.subscription.keys.auth,
             payload: JSON.stringify({
                 title: user.name,
-                message: 'Thanks for registering! Be prepared to be encouraged.'
+                message: msg
             })
         };
 
@@ -205,37 +226,6 @@ var YGTApp = function() {
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
-
-//http.createServer(app).listen(PORT, HOST);
-//console.log('Server listening on %s:%s', HOST, PORT);
-
-// // Run separate https server if on localhost
-// if (process.env.NODE_ENV != 'production') {
-//     https.createServer(app).listen(process.env.PORT, function () {
-//         console.log("Express server listening with https on port %d in %s mode", this.address().port, app.settings.env);
-//     });
-// };
-//
-// if (process.env.NODE_ENV == 'production') {
-//     app.use(function (req, res, next) {
-//         res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
-//         if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "http") {
-//             return res.redirect(301, 'https://' + req.host + req.url);
-//         } else {
-//             return next();
-//             }
-//     });
-// } else {
-//     app.use(function (req, res, next) {
-//         res.setHeader('Strict-Transport-Security', 'max-age=8640000; includeSubDomains');
-//         if (!req.secure) {
-//             return res.redirect(301, 'https://' + req.host  + ":" + process.env.PORT + req.url);
-//         } else {
-//             return next();
-//         }
-//     });
-//
-// };
 
 // Main code
 var server = new YGTApp();

@@ -80,7 +80,9 @@ function initialiseState() {
         }
 
         // Keep your server in sync with the latest subscriptionId
-        sendSubscriptionToServer(subscription);
+        var name = DEFAULT_NAME;
+        var user = new User(subscription, name);
+        sendSubscriptionToServer(user);
 
         // Set your UI to show they have subscribed for
         // push messages
